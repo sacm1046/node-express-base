@@ -1,26 +1,22 @@
-const { verifyToken } = require('../config/jwt');
-const logger = require('../config/logger');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/config');
 
 const authMiddleware = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+
+  if (!token) {
+    return res.unauthorized('No se proporcionó token de autenticación');
+  }
+
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader) {
-      return res.status(401).json({ error: 'No se proporcionó token de autenticación' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    if (!token) {
-      return res.status(401).json({ error: 'Formato de token inválido' });
-    }
-
-    const decoded = verifyToken(token);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
-    logger.error('Error de autenticación:', error);
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+    if (error.name === 'JsonWebTokenError') {
+      return res.unauthorized('Formato de token inválido');
+    }
+    return res.unauthorized('Token inválido o expirado');
   }
 };
 

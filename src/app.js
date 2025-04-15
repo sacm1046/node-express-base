@@ -3,6 +3,7 @@ const morgan = require('morgan');
 const logger = require('./config/logger');
 const sequelize = require('./config/database');
 const userRoutes = require('./routes/userRoutes');
+const responseMiddleware = require('./middleware/responseMiddleware');
 const {
   corsOptions,
   limiter,
@@ -21,6 +22,9 @@ app.use(limiter);
 app.use(speedLimiter);
 app.use(sanitizeInput);
 app.use(validateContentType);
+
+// Middleware de respuesta
+app.use(responseMiddleware);
 
 // Middleware básico
 app.use(express.json());
