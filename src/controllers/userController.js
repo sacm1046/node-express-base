@@ -1,7 +1,7 @@
 const { User } = require('../models');
 const { validateUser } = require('../validators/userValidator');
-const { hashPassword, comparePassword } = require('../utils/auth');
-const { generateToken } = require('../utils/jwt');
+const { hashPassword, comparePassword } = require('../utils/security');
+const { generateToken } = require('../config/jwt');
 const logger = require('../config/logger');
 
 class UserController {

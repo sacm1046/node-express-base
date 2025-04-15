@@ -3,7 +3,9 @@ const morgan = require('morgan');
 const logger = require('./config/logger');
 const sequelize = require('./config/database');
 const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 const responseMiddleware = require('./middleware/responseMiddleware');
+const authenticate = require('./middleware/authenticate');
 const {
   corsOptions,
   limiter,
@@ -32,6 +34,7 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 
 // Rutas
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
 // Rutas básicas
 app.get('/', (req, res) => {

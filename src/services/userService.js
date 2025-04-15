@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models');
 const logger = require('../config/logger');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../config/jwt');
