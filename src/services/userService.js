@@ -1,14 +1,41 @@
 const User = require('../models/User');
 const logger = require('../config/logger');
+const bcrypt = require('bcrypt');
+const { generateToken } = require('../config/jwt');
 
 class UserService {
   async createUser(userData) {
     try {
-      const user = await User.create(userData);
+      // Encriptar contraseña
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const user = await User.create({
+        ...userData,
+        password: hashedPassword
+      });
       logger.info(`Usuario creado: ${user.email}`);
       return user;
     } catch (error) {
       logger.error('Error al crear usuario:', error);
+      throw error;
+    }
+  }
+
+  async login(email, password) {
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        throw new Error('Contraseña incorrecta');
+      }
+
+      const token = generateToken(user);
+      return { user, token };
+    } catch (error) {
+      logger.error('Error en login:', error);
       throw error;
     }
   }
@@ -32,6 +59,11 @@ class UserService {
       if (!user) {
         throw new Error('Usuario no encontrado');
       }
+
+      if (userData.password) {
+        userData.password = await bcrypt.hash(userData.password, 10);
+      }
+
       await user.update(userData);
       logger.info(`Usuario actualizado: ${user.email}`);
       return user;
